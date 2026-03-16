@@ -31,7 +31,7 @@ spec:
         service: udaconnect-api
     spec:
       containers:
-      - image: udacity/nd064-udaconnect-api:latest
+      - image: johanslat/udaconnect-monolito-api:v1
         name: udaconnect-api
         imagePullPolicy: Always
         env:

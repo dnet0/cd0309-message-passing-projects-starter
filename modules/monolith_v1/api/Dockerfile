@@ -1,8 +1,13 @@
-FROM python:3.12-alpine
+FROM python:3.9-slim
 
 WORKDIR .
 
-RUN apk add --no-cache gcc musl-dev linux-headers geos libc-dev postgresql-dev
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    libgeos-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
