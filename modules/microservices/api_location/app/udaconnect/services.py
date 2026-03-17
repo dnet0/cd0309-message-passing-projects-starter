@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
@@ -10,6 +11,13 @@ from sqlalchemy.sql import text
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
+from kafka import KafkaProducer
+
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger("udaconnect-api-location")
+
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "locations")
+KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
 
 class LocationService:
     @staticmethod

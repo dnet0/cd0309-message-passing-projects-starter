@@ -7,10 +7,8 @@
     disrupting existing functionality.
 
 - gRPC:
-    1. Inter-service communication (Person & Connection): We will use gRPC for communication between the Person and 
-       Connection microservices, as this messaging protocol significantly reduces latency compared to REST.
-    2. Mobile location registration: For location data emitted by mobile devices, we will use gRPC because it 
-       enables faster communication, effectively reducing bandwidth consumption for mobile clients.
+    Inter-service communication (Person & Connection): We will use gRPC for communication between the Person and 
+    Connection microservices, as this messaging protocol significantly reduces latency compared to REST.
 - Kafka:
     We will use Kafka to improve performance and ensure resilience and fault isolation for the Location microservice, 
     reducing the risk of data loss. This ensures fast registration of location changes, which is a highly dynamic process.

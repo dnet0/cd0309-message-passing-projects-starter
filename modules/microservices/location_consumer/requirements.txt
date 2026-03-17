@@ -1,0 +1,5 @@
+kafka-python==2.0.2
+GeoAlchemy2==0.8.4
+psycopg2-binary==2.8.5
+SQLAlchemy==1.3.19
+shapely==1.7.0
