@@ -3,6 +3,7 @@ import sys
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List
+from urllib import response
 
 from app import db
 from app.udaconnect.models import Connection, Location, Person
@@ -16,7 +17,7 @@ import grpc
 import person_pb2
 import person_pb2_grpc
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("udaconnect-api-connection")
 
 
@@ -98,7 +99,11 @@ class PersonGrpcClient:
 
     def get_all_persons(self) -> Dict[int, Person]:
         response = self.stub.GetAllPersons(person_pb2.Empty())
+        
+        logger.info(f"gRPC GetAllPersons response: {len(response.persons)} persons received")
 
+        for person in response.persons:
+            logger.info(f"  -> id={person.id}, name={person.first_name} {person.last_name}")
         person_map = {}
         for p in response.persons:
             person = Person()

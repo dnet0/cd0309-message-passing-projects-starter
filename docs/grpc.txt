@@ -1,0 +1,39 @@
+================================================================
+gRPC Documentation - PersonService
+================================================================
+
+SERVICE
+-------
+Name:    PersonService
+Host:    udaconnect-api-person
+Port:    5005
+Method:  GetAllPersons
+Type:    Unary RPC
+Input:   Empty (no parameters required)
+Output:  PersonList
+
+DESCRIPTION
+-----------
+Returns a list of all persons in the system
+Called internally by the connection service to resolve
+person data when querying connections
+
+HOW TO VERIFY
+-------------
+Make a GET request to the connection service:
+
+GET /api/v2/persons/{person_id}/connection?start_date=2020-01-01&end_date=2020-12-30&distance=5
+
+Then check the connection service logs:
+
+kubectl logs udaconnect-api-connection-xxxxx
+
+Expected output:
+    INFO:udaconnect-api-connection:gRPC GetAllPersons response: 5 persons received
+    INFO:udaconnect-api-connection:  -> id=5, name=Taco Fargo
+    INFO:udaconnect-api-connection:  -> id=6, name=Frank Shader
+    INFO:udaconnect-api-connection:  -> id=1, name=Pam Trexler
+    INFO:udaconnect-api-connection:  -> id=8, name=Paul Badman
+    INFO:udaconnect-api-connection:  -> id=9, name=Otto Spring
+
+================================================================

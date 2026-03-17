@@ -1,3 +1,4 @@
+import json
 import os
 import logging
 from datetime import datetime, timedelta
@@ -19,6 +20,10 @@ logger = logging.getLogger("udaconnect-api-location")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "locations")
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
 
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BROKER,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
 class LocationService:
     @staticmethod
     def retrieve(location_id) -> Location:
@@ -39,11 +44,19 @@ class LocationService:
             logger.warning(f"Unexpected data format in payload: {validation_results}")
             raise Exception(f"Invalid payload: {validation_results}")
 
+        message = {
+            "person_id": location["person_id"],
+            "latitude": location["latitude"],
+            "longitude": location["longitude"],
+            "creation_time": str(location["creation_time"])
+        }
+        producer.send(KAFKA_TOPIC, value=message)
+        producer.flush()
+        logger.info(f"Mensaje enviado a Kafka: {message}")
+
         new_location = Location()
         new_location.person_id = location["person_id"]
         new_location.creation_time = location["creation_time"]
         new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-        db.session.add(new_location)
-        db.session.commit()
 
         return new_location

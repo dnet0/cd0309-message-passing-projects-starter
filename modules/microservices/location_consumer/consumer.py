@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Location  # import local para evitar dependencias circulares
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("udaconnect-location-consumer")
 
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "locations")
@@ -24,6 +24,7 @@ SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{
 
 
 def save_location(session, location: dict):
+    logging.info("Saving Location...")
     new_location = Location()
     new_location.person_id = location["person_id"]
     new_location.creation_time = location["creation_time"]
@@ -31,33 +32,38 @@ def save_location(session, location: dict):
 
     session.add(new_location)
     session.commit()
+    logging.info("Location saved successfully with ID: %s", new_location.id)
 
 
 def main():
-
+    logging.info("Starting consumer...")
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    consumer = KafkaConsumer(
-        KAFKA_TOPIC,
-        bootstrap_servers=[KAFKA_BROKER],
-        value_deserializer=lambda v: json.loads(v.decode("utf-8")),
-        group_id="location-consumer-group",
-        auto_offset_reset="earliest",
-    )
+    logging.info("Connecting to Kafka...")
 
-    logger.info("Consumidor Kafka arrancado, escuchando topic: %s", KAFKA_TOPIC)
+    try:
+        consumer = KafkaConsumer(
+            KAFKA_TOPIC,
+            bootstrap_servers=[KAFKA_BROKER],
+            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            auto_offset_reset="earliest",
+            request_timeout_ms=30000,  
+            session_timeout_ms=10000,
+            max_poll_interval_ms=30000,
+        ) 
+    except Exception as e:
+        logging.error(f"ERROR: {e}")
+        return
 
     for message in consumer:
-        location = message.value
-        logger.info("Menssage: %s", location)
+        logging.info(f"Message received: {message.value}")
         try:
-            save_location(session, location)
+            save_location(session, message.value)
         except Exception as e:
-            logger.error("Error save: %s", e)
+            logging.error(f"Error saving location: {e}")
             session.rollback()
-
-
+            
 if __name__ == "__main__":
     main()
